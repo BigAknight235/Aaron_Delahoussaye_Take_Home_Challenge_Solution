@@ -2,10 +2,6 @@
   "name": "AI Stealth: Take Home Challenge",
   "version": "1.0",
   "manifest_version": 3,
-  "action": {
-
-    "default_title": "Take Home Challenge: Send Disappearing Photo"
-  },
   "background": {
     "service_worker": "background.js",
     "type": "module"
