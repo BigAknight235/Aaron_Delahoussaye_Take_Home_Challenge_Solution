@@ -26,9 +26,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function findSelfChatId() {
   // 1. Attempt to extract from the URL fragment (e.g., web.telegram.org/a/#123456789)
   const urlMatch = window.location.hash.match(/^#(\d+)$/);
-  if (urlMatch) { // Access the captured group
-    console.log("Found self chat ID from URL fragment:", urlMatch[1]);
-    return parseInt(urlMatch[1], 10);
+  if (urlMatch && urlMatch) { // Access the captured group
+    console.log("Found self chat ID from URL fragment:", urlMatch);
+    return parseInt(urlMatch);
   }
 
   // 2. Attempt to find a "Saved Messages" link in the DOM and extract its ID
@@ -37,14 +37,14 @@ function findSelfChatId() {
   const savedMessagesLink = document.querySelector('a, div'); // More generic link or div with peer-id
   if (savedMessagesLink) {
     const linkMatch = savedMessagesLink.href ? savedMessagesLink.href.match(/messages\/(\d+)$/) : null;
-    if (linkMatch) { // Access the captured group
-      console.log("Found self chat ID from Saved Messages link:", linkMatch[1]);
-      return parseInt(linkMatch[1], 10);
+    if (linkMatch && linkMatch) { // Access the captured group
+      console.log("Found self chat ID from Saved Messages link:", linkMatch);
+      return parseInt(linkMatch);
     }
     // If it's a div, check its attributes or children for an ID
     if (savedMessagesLink.dataset.peerId) { // Hypothetical data attribute
         console.log("Found self chat ID from data-peer-id attribute:", savedMessagesLink.dataset.peerId);
-        return parseInt(savedMessagesLink.dataset.peerId, 10);
+        return parseInt(savedMessagesLink.dataset.peerId);
     }
   }
 
@@ -62,8 +62,8 @@ async function sendDisappearingPhotoWithTimer(timerSeconds) {
 
   // 1. Programmatically generate a simple photo Blob
   const svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="200" fill="#${Math.floor(Math.random()*16777215).toString(16)}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="#ffffff">Self-Destruct in ${timerSeconds}s</text></svg>`;
-  // Create a Blob from the SVG string (Blob expects an array of parts)
-  const photoBlob = new Blob([svg], { type: 'image/svg+xml' });
+  // Fix 1: line 68, col 30 - new Blob() expects an array as its first argument
+  const photoBlob = new Blob( , { type: 'image/svg+xml' });
   console.log("Generated photo Blob:", photoBlob);
 
   console.log("Simulating UI interactions...");
@@ -91,8 +91,8 @@ async function sendDisappearingPhotoWithTimer(timerSeconds) {
   }
 
   const dataTransfer = new DataTransfer();
-  // Create a File from the generated Blob (File expects an array of Blob parts)
-  const file = new File([photoBlob], `disappearing_photo_${Date.now()}.svg`, { type: photoBlob.type });
+  // Fix 2: line 96, col 25 - new File() expects an array as its first argument (for BlobParts)
+  const file = new File(, `disappearing_photo_${Date.now()}.svg`, { type: photoBlob.type });
   dataTransfer.items.add(file);
   fileInput.files = dataTransfer.files;
 
@@ -115,7 +115,7 @@ async function sendDisappearingPhotoWithTimer(timerSeconds) {
 
     // Find the option for '5 seconds' within the timer menu that appears.
     // This is also HYPOTHETICAL and needs live DOM inspection.
-    const fiveSecondOption = document.querySelector(`.timer-option-${timerSeconds}, div.menu-item-timer`);
+    const fiveSecondOption = document.querySelector(`, .timer-option-${timerSeconds}, div.menu-item-timer`);
     if (fiveSecondOption) {
       fiveSecondOption.click();
       console.log(`Set timer to ${timerSeconds} seconds.`);
